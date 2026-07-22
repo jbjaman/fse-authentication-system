@@ -34,3 +34,10 @@
 - GitHub
 - Postman
 - VS Code
+
+## Project Structure:
+
+fse-authentication-system/
+
+├── client/
+└── server/
