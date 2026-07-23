@@ -1,3 +1,5 @@
+"use client";
+
 const RegistraterForm = () => {
   return (
     <div>

@@ -37,7 +37,12 @@
 
 ## Project Structure:
 
-fse-authentication-system/
+```
 
-├── client/
-└── server/
+└─ fse-authentication-system/
+|  |
+|  └─ client/
+|  |
+|  └─ server/
+
+```
