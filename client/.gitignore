@@ -42,3 +42,4 @@ next-env.d.ts
 
 # file folder
 src/components/register/RegistraterForm2.tsx
+src/components/register/RegistraterForm3.tsx
