@@ -1,5 +1,7 @@
 "use client";
 
+import { registerSchema } from "@/lib/validations/register.schema";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
 type RegisterFormData = {
@@ -10,7 +12,13 @@ type RegisterFormData = {
 };
 
 const RegistraterForm = () => {
-  const { register, handleSubmit } = useForm<RegisterFormData>();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<RegisterFormData>({
+    resolver: zodResolver(registerSchema),
+  });
 
   const onSubmit = (data: RegisterFormData) => {
     console.log(data);
@@ -21,7 +29,7 @@ const RegistraterForm = () => {
       <h1>Create Your Account</h1>
       <p>Welcome! Please create your account</p>
       <form onSubmit={handleSubmit(onSubmit)}>
-        <div>
+        <div className="border-2 text-slate-50">
           <label htmlFor="name">Name</label>
           <input
             id="name"
@@ -30,6 +38,7 @@ const RegistraterForm = () => {
             autoComplete="name"
             {...register("name")}
           />
+          {errors.name && <p>{errors.name.message}</p>}
         </div>
         <div>
           <label htmlFor="email">Email</label>
@@ -40,6 +49,7 @@ const RegistraterForm = () => {
             autoComplete="email"
             {...register("email")}
           />
+          {errors.email && <p>{errors.email.message}</p>}
         </div>
         <div>
           <label htmlFor="password">Password</label>
@@ -50,6 +60,7 @@ const RegistraterForm = () => {
             autoComplete="new-password"
             {...register("password")}
           />
+          {errors.password && <p>{errors.password.message}</p>}
         </div>
         <div>
           <label htmlFor="confirmPassword">Confirm Password</label>
@@ -60,6 +71,7 @@ const RegistraterForm = () => {
             autoComplete="new-password"
             {...register("confirmPassword")}
           />
+          {errors.confirmPassword && <p>{errors.confirmPassword.message}</p>}
         </div>
         <button type="submit">Register</button>
       </form>
