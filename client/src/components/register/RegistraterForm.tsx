@@ -15,13 +15,21 @@ const RegistraterForm = () => {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
   });
 
-  const onSubmit = (data: RegisterFormData) => {
-    console.log(data);
+  const onSubmit = async (data: RegisterFormData) => {
+    const response = await fetch("/api/auth/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const result = await response.json();
+    console.log(result);
   };
 
   return (
@@ -73,7 +81,9 @@ const RegistraterForm = () => {
           />
           {errors.confirmPassword && <p>{errors.confirmPassword.message}</p>}
         </div>
-        <button type="submit">Register</button>
+        <button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? "Registering..." : "Register"}
+        </button>
       </form>
     </div>
   );
