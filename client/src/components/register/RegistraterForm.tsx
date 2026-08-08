@@ -1,16 +1,6 @@
 "use client";
 
-import { registerSchema } from "@/lib/validations/register.schema";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-
-type RegisterFormData = {
-  name: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-};
 
 type CPStats = {
   leetcode: {
@@ -28,7 +18,8 @@ type CPStats = {
     totalSolved: number;
     contestSolved: number;
     practiceSolved: number;
-    languageSolved: Record<string, number>;
+    // Fix: Updated Codeforces languageSolved type to match the API
+    languageSolved: { languageName: string; problemsSolved: number }[];
   };
   codechef: {
     rating: number;
@@ -36,7 +27,17 @@ type CPStats = {
     globalRank: number;
     codechefSolved: number;
   };
-  hackerrank: number;
+  hackerrank: {
+    totalSolved: number;
+    badges: {
+      name: string;
+      category: string;
+      stars: number;
+      totalStars: number;
+      solved: number;
+      totalChallenges: number;
+    }[];
+  };
 };
 
 const RegisterForm = () => {
@@ -62,136 +63,9 @@ const RegisterForm = () => {
     fetchStats();
   }, []);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm<RegisterFormData>({
-    resolver: zodResolver(registerSchema),
-  });
-
-  const onSubmit = async (data: RegisterFormData) => {
-    try {
-      const response = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-
-      const result = await response.json();
-      console.log("Registration Response:", result);
-    } catch (error) {
-      console.error("Registration Error:", error);
-    }
-  };
-
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-8">
       {/* Registration Section */}
-      <div className="bg-slate-900 p-6 rounded-2xl text-white shadow-xl">
-        <h1 className="text-2xl font-bold mb-1">Create Your Account</h1>
-        <p className="text-sm text-slate-400 mb-6">
-          Welcome! Please create your account
-        </p>
-
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div>
-            <label
-              htmlFor="name"
-              className="block text-sm font-medium text-slate-300 mb-1"
-            >
-              Name
-            </label>
-            <input
-              id="name"
-              type="text"
-              placeholder="Enter your name"
-              autoComplete="name"
-              {...register("name")}
-              className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            {errors.name && (
-              <p className="text-xs text-red-400 mt-1">{errors.name.message}</p>
-            )}
-          </div>
-
-          <div>
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-slate-300 mb-1"
-            >
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              placeholder="Enter your email"
-              autoComplete="email"
-              {...register("email")}
-              className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            {errors.email && (
-              <p className="text-xs text-red-400 mt-1">
-                {errors.email.message}
-              </p>
-            )}
-          </div>
-
-          <div>
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-slate-300 mb-1"
-            >
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              placeholder="Enter your password"
-              autoComplete="new-password"
-              {...register("password")}
-              className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            {errors.password && (
-              <p className="text-xs text-red-400 mt-1">
-                {errors.password.message}
-              </p>
-            )}
-          </div>
-
-          <div>
-            <label
-              htmlFor="confirmPassword"
-              className="block text-sm font-medium text-slate-300 mb-1"
-            >
-              Confirm Password
-            </label>
-            <input
-              id="confirmPassword"
-              type="password"
-              placeholder="Confirm your password"
-              autoComplete="new-password"
-              {...register("confirmPassword")}
-              className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            {errors.confirmPassword && (
-              <p className="text-xs text-red-400 mt-1">
-                {errors.confirmPassword.message}
-              </p>
-            )}
-          </div>
-
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full py-2.5 bg-blue-600 hover:bg-blue-500 disabled:bg-blue-800 text-white font-semibold rounded-lg transition"
-          >
-            {isSubmitting ? "Registering..." : "Register"}
-          </button>
-        </form>
-      </div>
 
       {/* Competitive Programming Stats Section */}
       {loadingStats ? (
@@ -200,7 +74,7 @@ const RegisterForm = () => {
         </div>
       ) : (
         stats && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             {/* LeetCode Card */}
             <div className="p-6 bg-slate-800 text-white rounded-xl flex flex-col justify-between">
               <div>
@@ -223,13 +97,13 @@ const RegisterForm = () => {
                 </div>
               </div>
 
-              {stats.leetcode?.languageSolved?.length > 0 && (
+              {(stats.leetcode?.languageSolved?.length ?? 0) > 0 && (
                 <div className="p-3 bg-slate-900 rounded-lg">
                   <p className="text-xs text-slate-400 mb-2 font-semibold">
                     Solved by Language:
                   </p>
                   <div className="flex flex-wrap gap-1.5">
-                    {stats.leetcode.languageSolved.map((lang) => (
+                    {stats.leetcode?.languageSolved?.map((lang) => (
                       <span
                         key={lang.languageName}
                         className="text-[11px] px-2 py-0.5 bg-slate-800 text-amber-300 rounded-full border border-slate-700 capitalize"
@@ -256,17 +130,17 @@ const RegisterForm = () => {
                     <p className="text-xs text-slate-400 capitalize">
                       Rank:{" "}
                       <span className="text-emerald-400 font-semibold">
-                        {stats.codeforces?.rank}
+                        {stats.codeforces?.rank || "N/A"}
                       </span>
                     </p>
                   </div>
                   <div className="text-right">
                     <span className="text-xl font-extrabold text-white">
-                      {stats.codeforces?.rating}
+                      {stats.codeforces?.rating || 0}
                     </span>
                     <p className="text-[10px] text-slate-400">
-                      Max: {stats.codeforces?.maxRating} (
-                      {stats.codeforces?.maxRank})
+                      Max: {stats.codeforces?.maxRating || 0} (
+                      {stats.codeforces?.maxRank || "N/A"})
                     </p>
                   </div>
                 </div>
@@ -275,41 +149,42 @@ const RegisterForm = () => {
                   <div>
                     <p className="text-[10px] text-slate-400">Total</p>
                     <p className="text-sm font-bold text-white">
-                      {stats.codeforces?.totalSolved}
+                      {stats.codeforces?.totalSolved || 0}
                     </p>
                   </div>
                   <div>
                     <p className="text-[10px] text-slate-400">Contest</p>
                     <p className="text-sm font-bold text-emerald-400">
-                      {stats.codeforces?.contestSolved}
+                      {stats.codeforces?.contestSolved || 0}
                     </p>
                   </div>
                   <div>
                     <p className="text-[10px] text-slate-400">Practice</p>
                     <p className="text-sm font-bold text-amber-400">
-                      {stats.codeforces?.practiceSolved}
+                      {stats.codeforces?.practiceSolved || 0}
                     </p>
                   </div>
                 </div>
               </div>
 
-              {stats.codeforces?.languageSolved && (
+              {/* Fix: Handled array mapping correctly for Codeforces */}
+              {(stats.codeforces?.languageSolved?.length ?? 0) > 0 && (
                 <div className="p-3 bg-slate-900 rounded-lg">
                   <p className="text-xs text-slate-400 mb-2 font-semibold">
                     Solved by Language:
                   </p>
                   <div className="flex flex-wrap gap-1.5">
-                    {Object.entries(stats.codeforces.languageSolved).map(
-                      ([lang, count]) => (
-                        <span
-                          key={lang}
-                          className="text-[11px] px-2 py-0.5 bg-slate-800 text-blue-300 rounded-full border border-slate-700"
-                        >
-                          {lang}:{" "}
-                          <strong className="text-white">{count}</strong>
-                        </span>
-                      ),
-                    )}
+                    {stats.codeforces?.languageSolved?.map((lang) => (
+                      <span
+                        key={lang.languageName}
+                        className="text-[11px] px-2 py-0.5 bg-slate-800 text-blue-300 rounded-full border border-slate-700"
+                      >
+                        {lang.languageName}:{" "}
+                        <strong className="text-white">
+                          {lang.problemsSolved}
+                        </strong>
+                      </span>
+                    ))}
                   </div>
                 </div>
               )}
@@ -323,11 +198,11 @@ const RegisterForm = () => {
                     CodeChef
                   </h3>
                   <span className="text-xl font-bold">
-                    {stats.codechef?.stars}
+                    {stats.codechef?.stars || "Unrated"}
                   </span>
                 </div>
                 <p className="text-3xl font-extrabold">
-                  {stats.codechef?.rating}{" "}
+                  {stats.codechef?.rating || 0}{" "}
                   <span className="text-sm font-normal text-slate-400">
                     Rating
                   </span>
@@ -335,23 +210,88 @@ const RegisterForm = () => {
               </div>
               <div className="mt-4 pt-3 border-t border-slate-700">
                 <p className="text-xs text-slate-400">
-                  Global Rank: #{stats.codechef?.globalRank}
+                  Global Rank: #{stats.codechef?.globalRank || "N/A"}
                 </p>
                 <p className="text-xs text-slate-400 mt-1">
-                  Total Solved: {stats.codechef?.codechefSolved}
+                  Total Solved: {stats.codechef?.codechefSolved || 0}
                 </p>
               </div>
             </div>
 
             {/* HackerRank Card */}
-            <div className="p-6 bg-slate-800 text-white rounded-xl text-center flex flex-col justify-center items-center">
-              <p className="text-sm text-emerald-400 font-semibold mb-1">
-                HackerRank
-              </p>
-              <p className="text-4xl font-extrabold">{stats.hackerrank}</p>
-              <span className="text-xs text-slate-400 mt-1">
-                Problems Solved
-              </span>
+            {/* HackerRank Card */}
+            {/* HackerRank Card */}
+            {/* HackerRank Card */}
+            <div className="p-6 bg-slate-800 text-white rounded-xl flex flex-col justify-between md:col-span-2">
+              <div>
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-bold text-emerald-400">
+                    HackerRank
+                  </h3>
+                  <span className="text-xl font-extrabold">
+                    {stats.hackerrank?.totalSolved || 0} Solved
+                  </span>
+                </div>
+
+                {/* Language-wise solved (from Language Proficiency badges) */}
+                {(() => {
+                  const langBadges =
+                    stats.hackerrank?.badges?.filter(
+                      (b) => b.category === "Language Proficiency",
+                    ) || [];
+                  return (
+                    langBadges.length > 0 && (
+                      <div className="p-3 bg-slate-900 rounded-lg mb-3">
+                        <p className="text-xs text-slate-400 mb-2 font-semibold">
+                          Solved by Language:
+                        </p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {langBadges.map((badge) => (
+                            <span
+                              key={badge.name}
+                              className="text-[11px] px-2 py-0.5 bg-slate-800 text-emerald-300 rounded-full border border-slate-700 capitalize"
+                            >
+                              {badge.name}:{" "}
+                              <strong className="text-white">
+                                {badge.solved}
+                              </strong>
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )
+                  );
+                })()}
+
+                {/* All badges */}
+                {(stats.hackerrank?.badges?.length ?? 0) > 0 && (
+                  <div className="p-3 bg-slate-900 rounded-lg space-y-2">
+                    <p className="text-xs text-slate-400 mb-1 font-semibold">
+                      All Badges:
+                    </p>
+                    {stats.hackerrank?.badges?.map((badge) => (
+                      <div
+                        key={badge.name}
+                        className="flex justify-between items-center text-[11px] px-2 py-1 bg-slate-800 rounded-full border border-slate-700"
+                      >
+                        <span className="text-emerald-300">
+                          {badge.name}{" "}
+                          <span className="text-slate-500">
+                            ({badge.category})
+                          </span>
+                        </span>
+                        <span className="text-white font-semibold">
+                          {"★".repeat(badge.stars)}
+                          {"☆".repeat(
+                            Math.max(badge.totalStars - badge.stars, 0),
+                          )}{" "}
+                          {badge.solved}/{badge.totalChallenges}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )
