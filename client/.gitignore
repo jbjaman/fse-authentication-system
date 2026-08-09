@@ -40,7 +40,12 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# file folder
+# file 
 src/components/register/RegistraterForm2.tsx
 src/components/register/RegistraterForm3.tsx
 src/components/register/RegistraterForm4.tsx
+src/components/register/RegistraterForm5.tsx
+
+# folder
+
+src/app/api/cp-stats/
