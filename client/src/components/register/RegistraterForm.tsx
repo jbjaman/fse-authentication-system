@@ -39,7 +39,7 @@ const RegistraterForm = () => {
 
   return (
     <>
-      <div className="bg-slate-900 p-6 rounded-2xl text-white shadow-xl">
+      <div className="bg-slate-700  m-6 p-6 rounded-2xl text-white shadow-xl">
         <h1 className="text-2xl font-bold mb-1">Create Your Account</h1>
         <p className="text-sm text-slate-400 mb-6">
           Welcome! Please create your account
@@ -141,7 +141,6 @@ const RegistraterForm = () => {
           </button>
         </form>
       </div>
-      ;
     </>
   );
 };

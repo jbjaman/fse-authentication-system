@@ -1,5 +1,6 @@
 import { registerSchema } from "@/lib/validations/register.schema";
 import { NextResponse } from "next/server";
+import { ZodError } from "zod";
 
 export async function POST(request: Request) {
   try {
@@ -14,12 +15,24 @@ export async function POST(request: Request) {
       message: "Register API Working",
     });
   } catch (error) {
+    if (error instanceof ZodError) {
+      return NextResponse.json(
+        {
+          message: "Validation failed",
+          errors: error.issues,
+        },
+        {
+          status: 400,
+        },
+      );
+    }
+
     return NextResponse.json(
       {
-        message: "Validation failed",
+        message: "Something went wrong",
       },
       {
-        status: 400,
+        status: 500,
       },
     );
   }
