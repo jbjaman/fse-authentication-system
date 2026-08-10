@@ -1,11 +1,26 @@
+import { registerSchema } from "@/lib/validations/register.schema";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
-  const body = await request.json();
+  try {
+    const body = await request.json();
 
-  console.log(body);
+    const validateData = registerSchema.parse(body);
 
-  return NextResponse.json({
-    message: "Register API Working",
-  });
+    // console.log(body);
+    console.log(validateData);
+
+    return NextResponse.json({
+      message: "Register API Working",
+    });
+  } catch (error) {
+    return NextResponse.json(
+      {
+        message: "Validation failed",
+      },
+      {
+        status: 400,
+      },
+    );
+  }
 }
