@@ -49,3 +49,4 @@ src/components/register/RegistraterForm5.tsx
 # folder
 
 src/app/api/cp-stats/
+src/app/api/auth/
